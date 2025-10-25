@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  api:
+    build: ./api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api/storage:/app/storage
+    env_file:
+      - ./api/.env
+    environment:
+      - PYTHONPATH=/app
+      - ALLOW_ORIGINS=http://localhost:${WEB_PORT:-5180}
+
+  web:
+    build: ./web
+    ports:
+      - "${WEB_PORT:-5180}:${WEB_PORT:-5180}"
+    env_file:
+      - ./web/.env
+    depends_on:
+      - api
+    environment:
+      - VITE_API_URL=http://localhost:8000
+      - WEB_PORT=${WEB_PORT:-5180}
