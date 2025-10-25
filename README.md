@@ -63,13 +63,16 @@ OPENAI_API_KEY=your-openrouter-api-key-here
 MAX_CSV_SIZE_MB=20
 MAX_IMAGE_SIZE_MB=10
 
+# Firebase Configuration
+GOOGLE_APPLICATION_CREDENTIALS="./path/to/your-service-account-key.json"
+FIREBASE_STORAGE_BUCKET=your-storage-bucket-name.appspot.com
+FIREBASE_PROJECT_ID=your-project-id
+
 # Server Configuration
 HOST=0.0.0.0
 PORT=8000
 DEBUG=false
 
-# Database Configuration
-DATABASE_URL=sqlite:///./storage/messages.db
 ```
 
 ### Frontend (`web/.env`)
@@ -100,7 +103,7 @@ VITE_DEV_MODE=true
 ### Advanced Features
 - ✅ **System Prompt Integration** - Consistent AI behavior with CSV context
 - ✅ **Dynamic CSV Context** - AI automatically knows about uploaded data
-- ✅ **Statistical Analysis** - Basic stats, missing values, histograms
+- ❌ **Statistical Analysis** - Basic stats, missing values, histograms
 - ✅ **File Validation** - Frontend and backend validation
 - ✅ **Error Handling** - User-friendly error messages
 - ✅ **API Key Management** - Clear configuration status
@@ -111,24 +114,6 @@ VITE_DEV_MODE=true
 - ✅ **TypeScript Support** - Type-safe frontend development
 - ✅ **Responsive Design** - Modern UI with Tailwind CSS
 - ✅ **CORS Configuration** - Proper cross-origin setup
-
-## 📸 Screenshots
-
-### Main Interface
-![Main Interface](docs/screenshots/main-interface.png)
-*Clean, modern interface with session management and file upload capabilities*
-
-### CSV Analysis
-![CSV Analysis](docs/screenshots/csv-analysis.png)
-*CSV upload with automatic data analysis and visualization options*
-
-### AI Chat with Context
-![AI Chat](docs/screenshots/ai-chat.png)
-*AI responses with full awareness of uploaded CSV data structure*
-
-### Image Processing
-![Image Processing](docs/screenshots/image-processing.png)
-*Image upload and AI-powered analysis*
 
 ## 🎯 Demo Steps
 
@@ -159,6 +144,41 @@ VITE_DEV_MODE=true
 3. Upload a non-PNG/JPG image to see format validation
 4. Check the API key status indicator
 
+## 🏗️ Architecture
+
+### Backend (FastAPI)
+- **Framework**: FastAPI with async support
+- **Database**: SQLite with session management
+- **AI Integration**: OpenRouter API with fallback mock responses
+- **File Processing**: Pandas for CSV, Matplotlib for charts
+- **Validation**: Pydantic models with custom error handling
+
+### Frontend (React + TypeScript)
+- **Framework**: React 18 with TypeScript
+- **Styling**: Tailwind CSS with custom dark theme
+- **State Management**: Zustand for global state
+- **API Client**: Axios with React Query for caching
+- **File Handling**: React Dropzone with validation
+
+### Infrastructure
+- **Containerization**: Docker with multi-stage builds
+- **Orchestration**: Docker Compose for development
+- **Networking**: Internal Docker network with CORS
+- **Storage**: Persistent volumes for data and uploads
+
+## 📚 API Documentation
+
+Once running, visit http://localhost:8000/docs for interactive API documentation.
+
+### Key Endpoints
+- `POST /chat` - Send chat messages
+- `POST /image-chat` - Analyze images
+- `POST /csv/upload` - Upload CSV files
+- `POST /csv/url` - Load CSV from URL
+- `GET /config` - Get configuration settings
+- `GET /health` - Health check with API key status
+
+
 ## 🛠️ Troubleshooting
 
 ### Common Issues
@@ -169,20 +189,6 @@ VITE_DEV_MODE=true
 - For GitHub URLs, add `?raw=1` parameter
 - Ensure URL points directly to CSV file
 - Check URL accessibility from your network
-
-**Example**:
-```
-❌ https://github.com/user/repo/blob/main/data.csv
-✅ https://github.com/user/repo/raw/main/data.csv
-```
-
-#### Matplotlib Headless Mode
-**Problem**: Chart generation fails in Docker
-**Solution**: Already configured in the code
-```python
-import matplotlib
-matplotlib.use('Agg')  # Non-interactive backend
-```
 
 #### API Key Configuration
 **Problem**: Getting mock responses instead of real AI
@@ -249,49 +255,13 @@ docker compose up api
 - Use `docker compose restart` after env changes
 - Check environment loading with `/health` endpoint
 
-## 🏗️ Architecture
-
-### Backend (FastAPI)
-- **Framework**: FastAPI with async support
-- **Database**: SQLite with session management
-- **AI Integration**: OpenRouter API with fallback mock responses
-- **File Processing**: Pandas for CSV, Matplotlib for charts
-- **Validation**: Pydantic models with custom error handling
-
-### Frontend (React + TypeScript)
-- **Framework**: React 18 with TypeScript
-- **Styling**: Tailwind CSS with custom dark theme
-- **State Management**: Zustand for global state
-- **API Client**: Axios with React Query for caching
-- **File Handling**: React Dropzone with validation
-
-### Infrastructure
-- **Containerization**: Docker with multi-stage builds
-- **Orchestration**: Docker Compose for development
-- **Networking**: Internal Docker network with CORS
-- **Storage**: Persistent volumes for data and uploads
-
-## 📚 API Documentation
-
-Once running, visit http://localhost:8000/docs for interactive API documentation.
-
-### Key Endpoints
-- `POST /chat` - Send chat messages
-- `POST /image-chat` - Analyze images
-- `POST /csv/upload` - Upload CSV files
-- `POST /csv/url` - Load CSV from URL
-- `GET /config` - Get configuration settings
-- `GET /health` - Health check with API key status
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test with `docker compose up --build`
-5. Submit a pull request
+1. Chatbot Support: Chatgpt, Cursor
+2. API chatbot free: Openrounter
 
-## 🔄 Recent Updates & Features
+## 🔄 Detail Features
 
 ### 🆕 Chat Management System
 - **Sequential Chat Numbering**: Chat 1, Chat 2, Chat 3... (stable, no gaps)
