@@ -1,6 +1,6 @@
 # AI Fullstack Assignment
 
-A modern full-stack application built with FastAPI (backend) and React + TypeScript + Tailwind CSS (frontend) that provides AI-powered chat capabilities with CSV data analysis and image processing.
+A modern full-stack application built with FastAPI (backend), Firebase Storage (database) and React + TypeScript + Tailwind CSS (frontend) that provides AI-powered chat capabilities with CSV data analysis and image processing.
 
 ## 🚀 Quick Start
 
