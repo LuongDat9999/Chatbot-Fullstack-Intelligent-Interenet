@@ -12,8 +12,8 @@ A modern full-stack application built with FastAPI (backend) and React + TypeScr
 
 1. **Clone and navigate to the project:**
    ```bash
-   git clone <repository-url>
-   cd ai_fullstack_assignment
+   git clone https://github.com/LuongDat9999/Chatbot-Fullstack-Intelligent-Interenet.git
+   cd Chatbot-Fullstack-Intelligent-Interenet
    ```
 
 2. **Set up environment variables:**
@@ -23,7 +23,7 @@ A modern full-stack application built with FastAPI (backend) and React + TypeScr
    cp api/env.example api/.env
    # Edit api/.env and add your OpenRouter API key
    ```
-
+   
    **Frontend (`web/.env`):**
    ```bash
    cp web/env.example web/.env
@@ -31,14 +31,13 @@ A modern full-stack application built with FastAPI (backend) and React + TypeScr
    ```
 
 3. **Start the application:**
-```bash
+   ```bash
    docker compose up --build
    ```
-
-   **Port Configuration:**
-   - By default, the frontend runs on port **5180** (changed from 5175 to avoid conflicts)
-   - You can customize the port using the `WEB_PORT` environment variable:
+   
+   **Alternative port configuration:**
    ```bash
+   # Use custom port to avoid conflicts
    WEB_PORT=5181 docker compose up --build
    ```
 
@@ -46,8 +45,14 @@ A modern full-stack application built with FastAPI (backend) and React + TypeScr
    - **Frontend**: http://localhost:5180 (or your custom port)
    - **Backend API**: http://localhost:8000
    - **API Documentation**: http://localhost:8000/docs
+   - **Health Check**: http://localhost:8000/health
 
-## 🔧 Environment Configurationgit
+5. **Verify installation:**
+   - Check API key status at http://localhost:8000/health
+   - Upload a CSV file to test data analysis
+   - Try asking "Summarize the dataset" to test intent detection
+
+## 🔧 Environment Configuration
 
 ### Backend (`api/.env`)
 ```env
