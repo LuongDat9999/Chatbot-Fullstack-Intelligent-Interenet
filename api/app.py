@@ -25,6 +25,9 @@ from services.csv_tools import (
     most_missing, 
     load_csv_from_path
 )
+from engine import run_orchestrator, Block, register_error_handlers
+from data.csv_registry import registry, load_csv_for_session
+from utils.logging import setup_logging, request_id_middleware
 
 # Load environment variables
 load_dotenv()
@@ -66,6 +69,15 @@ WEB_PORT = os.getenv("WEB_PORT", "5180")
 ALLOW_ORIGINS = os.getenv("ALLOW_ORIGINS", f"http://localhost:{WEB_PORT}")
 
 app = FastAPI(title="AI Fullstack Assignment API", version="1.0.0")
+
+# Setup logging
+setup_logging(debug=os.getenv("DEBUG", "false").lower() == "true")
+
+# Add request ID middleware
+app.add_middleware(request_id_middleware)
+
+# Register error handlers
+register_error_handlers(app)
 
 # Configure CORS
 origins = [
@@ -138,6 +150,15 @@ class CSVMissingResponse(BaseModel):
 class CSVHistResponse(BaseModel):
     ok: bool
     image_base64: Optional[str] = None
+    error: Optional[str] = None
+
+class NewChatRequest(BaseModel):
+    session_id: Optional[str] = None
+    message: str
+
+class NewChatResponse(BaseModel):
+    ok: bool
+    blocks: Optional[List[Dict[str, Any]]] = None
     error: Optional[str] = None
 
 # Session metadata persistence functions
@@ -378,10 +399,10 @@ async def chat_endpoint(request: ChatRequest):
             dtypes_str = ", ".join([f"{k}:{v}" for k, v in list(csv_meta["dtypes"].items())[:20]])  # Limit to 20 dtypes
             
             csv_context_prompt = f"""CSV context:
-- rows: {csv_meta["rows"]}
-- columns: {columns_str}
-- dtypes: {dtypes_str}
-When asked for plots, respond with textual summaries only."""
+                                    - rows: {csv_meta["rows"]}
+                                    - columns: {columns_str}
+                                    - dtypes: {dtypes_str}
+                                    When asked for plots, respond with textual summaries only."""
             
             # Insert this prompt at the beginning of conversation
             conversation.insert(1, {
@@ -545,6 +566,28 @@ async def image_chat_endpoint(
             content={"ok": False, "error": error_msg}
         )
 
+@app.post("/chat/v2", response_model=NewChatResponse)
+async def chat_v2_endpoint(request: NewChatRequest):
+    """New chat endpoint using the orchestrator-based architecture"""
+    try:
+        session_id = request.session_id
+        user_text = request.message
+        
+        print(f"INFO: Chat v2 - session_id={session_id}, message={user_text[:50]}...")
+        
+        # Run orchestrator
+        result = run_orchestrator(session_id, user_text, llm_enabled=is_api_key_configured())
+        
+        # Convert block to dict for JSON response
+        blocks = [result.model_dump(exclude_none=True)]
+        
+        return NewChatResponse(ok=True, blocks=blocks)
+        
+    except Exception as e:
+        error_msg = str(e)
+        print(f"ERROR: Chat v2 failed - session_id={session_id}, error={error_msg}")
+        return NewChatResponse(ok=False, error=error_msg)
+
 @app.post("/csv/upload", response_model=CSVUploadResponse)
 async def csv_upload_endpoint(
     session_id: str = Form(...),
@@ -588,6 +631,15 @@ async def csv_upload_endpoint(
         df = load_csv_from_path(file_path)
         stats = basic_stats(df)
         
+        # Store in registry
+        registry.put(
+            session_id,
+            df,
+            file_path,
+            df_info["column_names"],
+            df_info["dtypes"]
+        )
+        
         # Create metadata
         meta = {
             "csv_path": file_path,
@@ -602,6 +654,7 @@ async def csv_upload_endpoint(
         # Save to Firestore
         attachment_data = {
             "type": "csv",
+            
             "storage_path": file_path,
             "rows": df_info["rows"],
             "columns": df_info["column_names"],
@@ -659,6 +712,15 @@ async def csv_url_endpoint(request: CSVURLRequest):
         # Load DataFrame for stats
         df = load_csv_from_path(file_path)
         stats = basic_stats(df)
+        
+        # Store in registry
+        registry.put(
+            request.session_id,
+            df,
+            file_path,
+            df_info["column_names"],
+            df_info["dtypes"]
+        )
         
         # Create metadata
         meta = {

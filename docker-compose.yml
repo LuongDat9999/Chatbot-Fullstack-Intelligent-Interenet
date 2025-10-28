@@ -7,6 +7,7 @@ services:
       - "8000:8000"
     volumes:
       - ./api/storage:/app/storage
+      - ./api/service-account-key.json:/app/service-account-key.json
     env_file:
       - ./api/.env
     environment:

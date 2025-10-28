@@ -38,13 +38,6 @@ function App() {
     setSessionId(chatId)
   }
   
-  const handleNewChat = () => {
-    // Reset session when creating new chat
-    resetSession()
-    setSelectedChatId(null)
-    setIsLoading(false)
-  }
-
   const handleCreateChat = (chatId: string) => {
     // Handle new chat creation from MessageInput
     setSelectedChatId(chatId)
@@ -72,9 +65,9 @@ function App() {
     <div className="h-screen bg-bg flex overflow-hidden">
       {/* Left Sidebar - Chat List */}
       <ChatList 
+        user={user}
         selectedChatId={selectedChatId}
         onSelectChat={handleSelectChat}
-        onNewChat={handleNewChat}
       />
 
       {/* Main Content */}
